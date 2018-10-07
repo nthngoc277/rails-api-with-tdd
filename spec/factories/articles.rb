@@ -1,7 +1,7 @@
 FactoryBot.define do
   factory :article do
-    title { "MyString" }
-    context { "MyText" }
-    slug { "MyString" }
+    title { "Title" }
+    content { "Content" }
+    slug { "slug" }
   end
 end
