@@ -35,4 +35,23 @@ describe ArticlesController do
       expect(json_data.first['id']).to eq expected_article.id.to_s
     end
   end
+
+  describe 'GET show' do
+    let(:article) { create :article }
+    subject { get :show, params: { id: article.id } }
+
+    it 'can be accessed succesffully' do
+      expect(response).to have_http_status(:ok)
+    end
+
+    it 'displays right data for an article' do
+      subject
+      expect(json_data['id']).to eq article.id.to_s
+      expect(json_data['attributes']).to eq ({
+        'title' => article.title,
+        'content' => article.content,
+        'slug' => article.slug
+      })
+    end
+  end
 end
