@@ -40,6 +40,11 @@ describe UserAuthenticator do
       it 'save the user if user does not exist' do
         expect{ subject }.to change{ User.count }.by(1)
       end
+
+      it 'reuse the existed user' do
+        user = create :user, user_data
+        expect{ subject }.not_to change{ User.count }
+      end
     end
   end
 end
