@@ -42,7 +42,7 @@ describe UserAuthenticator do
       end
 
       it 'reuse the existed user' do
-        user = create :user, user_data
+        @user = create :user, user_data
         expect{ subject }.not_to change{ User.count }
       end
 
