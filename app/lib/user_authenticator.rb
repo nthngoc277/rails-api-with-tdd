@@ -38,8 +38,8 @@ class UserAuthenticator
   end
 
   def prepare_user
-    @user = if User.exists?(login: user_data['login'])
-      User.find_by_login(user_data.login)
+    @user = if User.exists?(login: user_data[:login])
+      User.find_by_login(user_data[:login])
     else
       User.create(user_data.merge(provider: 'github'))
     end
