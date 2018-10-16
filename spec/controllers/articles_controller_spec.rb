@@ -57,7 +57,7 @@ describe ArticlesController do
 
   describe 'POST create' do
     subject { post :create }
-    
+
     context 'when no code provided' do
       it_behaves_like 'forbidden_requests'
     end
@@ -141,6 +141,103 @@ describe ArticlesController do
 
       it 'creates the article' do
         expect{ subject }.to change{ Article.count }.by(1)
+      end
+    end
+  end
+
+  describe 'PUT update' do
+    let(:article) { create :article }
+    context 'when no code provided' do
+      subject { patch :update, params: { id: article.id } }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when invalid code provided' do
+      before {
+        request.headers['authorization'] = 'Invalid code'
+      }
+      subject { patch :update, params: { id: article.id } }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when authorized' do
+      let(:user) { create :user }
+      let(:access_token) { user.create_access_token }
+
+      before {
+        request.headers['authorization'] = "Bearer #{access_token.token}"
+      }
+      context 'when invalid parameters provided' do
+        let(:invalid_attributes) do
+          {
+            'data' => {
+              'attributes' => {
+                'title' => '', 
+                'content' => '',
+                'slug' => ''
+              }
+            }
+          }
+        end
+        subject { patch :update, params: { id: article.id }.merge(invalid_attributes) }
+        it 'returns 422 status code' do
+          subject
+          expect(response).to have_http_status(:unprocessable_entity)
+        end
+
+        it 'returns proper error json' do
+          subject
+          expect(json['errors']).to include(
+            {
+              'source' => { 'pointer' => '/data/attributes/title' },
+              'detail' => "can't be blank",
+            },
+            {
+              'source' => { 'pointer' => '/data/attributes/content' },
+              'detail' => "can't be blank",
+            },
+            {
+              'source' => { 'pointer' => '/data/attributes/slug' },
+              'detail' => "can't be blank",
+            }
+          )
+        end
+      end
+
+      context 'when valid parameters provided' do
+        let(:user) { create :user }
+        let(:access_token) { user.create_access_token }
+        let(:article) { create :article }
+        subject { patch :update, params: valid_attributes.merge(id: article.id) }
+        before {
+          request.headers['authorization'] = "Bearer #{access_token.token}"
+          subject
+        }
+        let(:valid_attributes) do
+          {
+            'data' => {
+              'attributes' => {
+                'title' => 'this is some title', 
+                'content' => 'this is some super content',
+                'slug' => 'this-is-some-title'
+              }
+            }
+          }
+        end
+        it 'has 200 status code' do
+          expect(response).to have_http_status(:ok)
+        end
+
+        it 'has proper json body' do
+          expect(json_data['attributes']).to include(valid_attributes['data']['attributes'])
+        end
+
+        it 'updates attributes' do
+          article.reload
+          expect(article.title).to eq(valid_attributes['data']['attributes']['title'])
+          expect(article.content).to eq(valid_attributes['data']['attributes']['content'])
+          expect(article.slug).to eq(valid_attributes['data']['attributes']['slug'])
+        end
       end
     end
   end
