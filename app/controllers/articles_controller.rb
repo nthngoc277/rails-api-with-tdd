@@ -20,7 +20,7 @@ class ArticlesController < ApplicationController
   end
 
   def update
-    article = current_user.articles.find(params['id'])
+    article = current_user.articles.find(params[:id])
     article.update_attributes!(article_params)
     render json: article, status: :ok
   rescue ActiveRecord::RecordNotFound
@@ -28,6 +28,12 @@ class ArticlesController < ApplicationController
   rescue
     render json: article, adapter: :json_api,
       serializer: ErrorSerializer, status: :unprocessable_entity
+  end
+
+  def destroy
+    current_user.articles.find(params[:id]).destroy
+  rescue ActiveRecord::RecordNotFound
+    forbidden_request_error
   end
 
   private

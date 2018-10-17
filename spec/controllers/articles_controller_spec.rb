@@ -175,7 +175,6 @@ describe ArticlesController do
     end
 
     context 'when authorized' do
-      let(:user) { create :user }
       let(:access_token) { user.create_access_token }
 
       before {
@@ -250,6 +249,55 @@ describe ArticlesController do
           expect(article.content).to eq(valid_attributes['data']['attributes']['content'])
           expect(article.slug).to eq(valid_attributes['data']['attributes']['slug'])
         end
+      end
+    end
+  end
+
+  describe 'DELETE destroy' do
+    let(:user) { create :user }
+    let(:article) { create :article, user: user }
+
+    context 'when no code provided' do
+      subject { delete :destroy, params: { id: article.id } }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when invalid code provided' do
+      before {
+        request.headers['authorization'] = 'Invalid code'
+      }
+      subject { delete :destroy, params: { id: article.id } }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when trying to delete not owned article' do
+      let(:other_user) { create :user }
+      let(:access_token) { other_user.create_access_token }
+
+      subject { delete :destroy, params: { id: article.id } }
+
+      before { 
+        request.headers['authorization'] = "Bearer #{access_token.token}"
+      }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when authorized' do
+      let(:access_token) { user.create_access_token }
+      let!(:article) { create :article, user: user }
+      subject { delete :destroy, params: { id: article.id } }
+
+      before {
+        request.headers['authorization'] = "Bearer #{access_token.token}"
+      }
+
+      it 'has 204 status code' do
+        subject
+        expect(response).to have_http_status(:no_content)
+      end
+
+      it 'deletes article' do
+        expect{ subject }.to change{ Article.count }.by(-1)
       end
     end
   end
