@@ -146,7 +146,9 @@ describe ArticlesController do
   end
 
   describe 'PUT update' do
-    let(:article) { create :article }
+    let(:user) { create :user }
+    let(:article) { create :article, user: user }
+
     context 'when no code provided' do
       subject { patch :update, params: { id: article.id } }
       it_behaves_like 'forbidden_requests'
@@ -157,6 +159,18 @@ describe ArticlesController do
         request.headers['authorization'] = 'Invalid code'
       }
       subject { patch :update, params: { id: article.id } }
+      it_behaves_like 'forbidden_requests'
+    end
+
+    context 'when trying to update not owned article' do
+      let(:other_user) { create :user }
+      let(:access_token) { other_user.create_access_token }
+
+      subject { patch :update, params: { id: article.id } }
+
+      before { 
+        request.headers['authorization'] = "Bearer #{access_token.token}"
+      }
       it_behaves_like 'forbidden_requests'
     end
 
@@ -205,9 +219,7 @@ describe ArticlesController do
       end
 
       context 'when valid parameters provided' do
-        let(:user) { create :user }
-        let(:access_token) { user.create_access_token }
-        let(:article) { create :article }
+        let(:article) { create :article, user: user }
         subject { patch :update, params: valid_attributes.merge(id: article.id) }
         before {
           request.headers['authorization'] = "Bearer #{access_token.token}"
