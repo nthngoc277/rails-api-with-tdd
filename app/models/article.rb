@@ -5,5 +5,6 @@ class Article < ApplicationRecord
 
   belongs_to :user
 
+  has_many :comments
   scope :recent, -> { order(created_at: :desc) }
 end
