@@ -28,6 +28,7 @@ gem 'active_model_serializers', '~> 0.10.7'
 gem 'kaminari', '~> 1.1', '>= 1.1.1'
 gem 'octokit', '~> 4.12'
 gem 'dotenv-rails', '~> 2.5'
+gem 'bcrypt', '~> 3.1', '>= 3.1.12'
 
 group :development, :test do
   # Call 'byebug' anywhere in the code to stop execution and get a debugger console
