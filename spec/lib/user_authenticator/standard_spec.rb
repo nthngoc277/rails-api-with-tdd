@@ -26,6 +26,12 @@ describe UserAuthenticator::Standard do
     end
 
     context 'when success auth' do
+      let(:user) { create :user, login: 'ngoc', password: 'secret' }
+      before { user }
+      it 'set the user found in db' do
+        expect{ subject }.not_to change{ User.count }
+        expect(authenticator.user).to eq(user)
+      end
     end
   end
 end
