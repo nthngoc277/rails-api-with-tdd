@@ -13,6 +13,12 @@ RSpec.describe User, type: :model do
       expect(user.errors.messages[:login]).to include("can't be blank")
     end
 
+    it 'validates presence of password for standard provider' do
+      user = build :user, login: 'ngoc', provider: 'standard', password: nil
+      expect(user).not_to be_valid
+      expect(user.errors.messages[:password]).to include("can't be blank")
+    end
+
     it 'validates the presence of provider' do
       user = build :user, provider: ''
       expect(user).not_to be_valid

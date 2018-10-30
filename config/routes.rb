@@ -5,5 +5,6 @@ Rails.application.routes.draw do
   end
 
   post 'login', to: 'access_tokens#create'
+  post '/sign_up', to: 'registrations#create'  
   delete 'logout', to: 'access_tokens#destroy'
 end
